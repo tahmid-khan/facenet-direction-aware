@@ -406,16 +406,25 @@ def get_model_filenames(model_dir):
     return meta_file, ckpt_file
   
 def distance(embeddings1, embeddings2, distance_metric=0):
+    # Mean squared error
+    diff = np.subtract(embeddings1, embeddings2)
+    mse = np.mean(np.square(diff),1)
+
+    # Distance based on cosine similarity
+    dot = np.sum(np.multiply(embeddings1, embeddings2), axis=1)
+    norm = np.linalg.norm(embeddings1, axis=1) * np.linalg.norm(embeddings2, axis=1)
+    cosine_similarity = dot / norm
+    cosine_dist = 1 - cosine_similarity
+
+    dist = np.sqrt(mse + cosine_dist)
+
+    # dist = np.arccos(cosine_similarity) / math.pi
     if distance_metric==0:
-        # Euclidian distance
-        diff = np.subtract(embeddings1, embeddings2)
-        dist = np.sum(np.square(diff),1)
+        # dist = mse
+        pass
     elif distance_metric==1:
-        # Distance based on cosine similarity
-        dot = np.sum(np.multiply(embeddings1, embeddings2), axis=1)
-        norm = np.linalg.norm(embeddings1, axis=1) * np.linalg.norm(embeddings2, axis=1)
-        similarity = dot / norm
-        dist = np.arccos(similarity) / math.pi
+        # dist = cosine_dist
+        pass
     else:
         raise 'Undefined distance metric %d' % distance_metric 
         
